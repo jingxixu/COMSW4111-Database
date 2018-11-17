@@ -13,11 +13,26 @@ def cleanup():
     cat.drop_table("batting")
     cat.drop_table("teams")
 
+def print_start(test_name, info):
+    print_test_separator("Starting {}".format(test_name))
+    print_info(info)
+
+def print_end(test_name, expect):
+    print_expect(expect)
+    print_test_separator("Complete {}".format(test_name))
+
+
 def print_test_separator(msg):
     print("\n")
     lot_of_stars = 20*'*'
     print(lot_of_stars, '  ', msg, '  ', lot_of_stars)
     print("\n")
+
+def print_expect(s):
+    print("\n##### Expected result:{}".format(s))
+
+def print_info(s):
+    print("##### {}\n".format(s))
 
 def test_create_table_1():
     """
@@ -183,6 +198,8 @@ def test_create_table_5_prep():
 def test_create_table_5():
     """
     Modifies a preexisting/precreated table definition.
+
+    NOTE: this depends on test_create_table_5_prep.
     :return:
     """
     print_test_separator("Starting test_create_table_5")
@@ -193,9 +210,10 @@ def test_create_table_5():
     print("Initial status of table = \n", json.dumps(t.describe_table(), indent=2))
     t.add_column_definition(CSVCatalog.ColumnDefinition("HR", "number"))
     t.add_column_definition(CSVCatalog.ColumnDefinition("G", "number"))
-    t.define_index("team_year_idx", "INDEX", ['teamID', 'yearID'])
+    t.define_index("team_year_idx", ['teamID', 'yearID'], "INDEX")
     print("Modified status of table = \n", json.dumps(t.describe_table(), indent=2))
-    print_test_separator("Success test_create_table_5")
+    print("\n##### Expected result: pass")
+    print_test_separator("Complete test_create_table_5")
 
 def test_to_json():
     try:
@@ -226,10 +244,11 @@ def test_to_json():
 
 def my_test_1():
     """
-    Test add_column_definition, Should pass.
+    Test add_column_definition. Should pass.
 
     :return:
     """
+    print_start("my_test_1", "Test add_column_definition. Should pass.")
     cleanup()
     cat = CSVCatalog.CSVCatalog()
 
@@ -239,17 +258,42 @@ def my_test_1():
     cds.append(CSVCatalog.ColumnDefinition("yearID", column_type="text", not_null=True))
     cds.append(CSVCatalog.ColumnDefinition("stint", column_type="number", not_null=True))
 
-    print_test_separator("Starting my_test_1")
     t = cat.create_table("batting", "data/Batting.csv", cds)
     print("Before adding another column:\n", json.dumps(t.describe_table(), indent=2))
     new_cd = CSVCatalog.ColumnDefinition("AB", column_type="number", not_null=False)
     t.add_column_definition(new_cd)
-    print("After adding another column:\n", json.dumps(t.describe_table(), indent=2))
-    print_test_separator("Complete my_test_1")
+    print("\nAfter adding another column:\n", json.dumps(t.describe_table(), indent=2))
+    print_end("my_test_1", "pass")
+
+def my_test_4():
+    """
+    Try add_column_definition if the column already exists. This should fail.
+
+    :return:
+    """
+    print_test_separator("Starting my_test_4")
+    cleanup()
+    cat = CSVCatalog.CSVCatalog()
+
+    cds = []
+    cds.append(CSVCatalog.ColumnDefinition("playerID", "text", True))
+    cds.append(CSVCatalog.ColumnDefinition("nameLast", "text", True))
+    cds.append(CSVCatalog.ColumnDefinition("nameFirst", column_type="text"))
+
+    t = cat.create_table("people", "data/People.csv", cds)
+    print("People table", json.dumps(t.describe_table(), indent=2))
+    print("\nTry to add a duplicate column playerID:")
+    try:
+        c = CSVCatalog.ColumnDefinition("playerID")
+        t.add_column_definition(c)
+    except Exception as e:
+        print("Exception e = ", e)
+    print("\n##### Expected result: fail")
+    print_test_separator("Complete my_test_4")
 
 def my_test_2():
     """
-    Try loading a table which does not exists. Should fail.
+    Try loading a table which does not exist. Should fail.
 
     :return:
     """
@@ -257,21 +301,39 @@ def my_test_2():
 
 def my_test_3():
     """
-    Try passing index definitions in table definition. Should pass
-
-    :return:
+    Try passing multiple index definitions in table definition. Should pass.
     """
-    pass
+    print_test_separator("Starting my_test_3")
+    print("##### Try passing multiple index definitions in table definition. Should pass.\n")
+    cleanup()
+
+    cat = CSVCatalog.CSVCatalog()
+    cds =[]
+    cds.append(CSVCatalog.ColumnDefinition("playerID", "text", True))
+    cds.append(CSVCatalog.ColumnDefinition("nameLast", "text", True))
+    cds.append(CSVCatalog.ColumnDefinition("nameFirst", column_type="text"))
+
+    ids = []
+    ## TODO test this?
+    # ids.append(CSVCatalog.IndexDefinition("PRIMARY", "PRIMARY", ["playerID"]))
+    # ids.append(CSVCatalog.IndexDefinition("my_idx", "INDEX", ["playerID"]))
+    ids.append(CSVCatalog.IndexDefinition("PRIMARY", "PRIMARY", ["playerID"]))
+    ids.append(CSVCatalog.IndexDefinition("my_idx", "INDEX", ["nameLast", "nameFirst"]))
+    t = cat.create_table("people", "data/People.csv", cds, ids)
+    print("People table", json.dumps(t.describe_table(), indent=2))
+    print("\n##### Expected result: pass")
+    print_test_separator("Complete my_test_3")
 
 if __name__ == "__main__":
-    # test_create_table_1()
-    # test_create_table_2_fail()
-    # test_create_table_3()
-    # test_create_table_3_fail()
-    # test_create_table_4()
-    # my_test_1()
-    # test_create_table_4_fail()
+    test_create_table_1()
+    test_create_table_2_fail()
+    test_create_table_3()
+    test_create_table_3_fail()
+    test_create_table_4()
+    test_create_table_4_fail()
     # test_to_json() # do not worry about this yet
-    # test_create_table_5_prep()
-    # TODO be able to load and test
+    test_create_table_5_prep()
     test_create_table_5()
+    my_test_1()
+    my_test_4()
+    my_test_3()

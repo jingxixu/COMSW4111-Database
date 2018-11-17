@@ -87,12 +87,11 @@ class TableDefinition:
         if not load:
             self.table_name = t_name
             self.csv_f = csv_f
-            self.column_definitions = column_definitions if column_definitions is not None else []
-            self.index_definitions = index_definitions if index_definitions is not None else []
+            self.column_definitions = []
+            self.index_definitions = []
             self.cnx = cnx
 
-
-            # construct valid columns
+            # construct valid columns based on csv file
             csv.register_dialect('myDialect',
                                  delimiter=',',
                                  skipinitialspace=True)
@@ -115,20 +114,46 @@ class TableDefinition:
             run_q(self.cnx, q, args, False)
 
             ## add column metadata
-            if len(column_definitions) > 0:
+            if column_definitions is not None:
                 for c in column_definitions:
-                    self.__add_column_definition(c)
+                    self.add_column_definition(c)
 
             ## add index metadata
-            pass
+            if index_definitions is not None:
+                for i in index_definitions:
+                    self.define_index(i.index_name, i.columns, i.index_type)
 
-        else:
+        else:   # load an existing table
+            # check if the table name exists
             q = "select table_name from catalog_tables"
-            result = run_q(self.cnx, q, None, True)
+            result = run_q(cnx, q, None, True)
             existed_tbnms = [r['table_name'] for r in result]
-            if self.table_name not in existed_tbnms:
+            if t_name not in existed_tbnms:
                 raise de.DataTableException(message="Table name {} does not exists".format(self.table_name))
 
+            self.table_name = t_name
+            self.csv_f = csv_f
+            self.column_definitions = column_definitions if column_definitions is not None else []
+            self.index_definitions = index_definitions if index_definitions is not None else []
+            self.cnx = cnx
+
+            # construct valid columns based on csv file
+            csv.register_dialect('myDialect',
+                                 delimiter=',',
+                                 skipinitialspace=True)
+            with open(self.csv_f, 'r') as csvFile:
+                reader = csv.reader(csvFile, dialect='myDialect')
+                for row in reader:
+                    self.valid_columns = row
+                    break
+
+    @property
+    def columns(self):
+        return [cd.column_name for cd in self.column_definitions]
+
+    @property
+    def indices(self):
+        return [idef.index_name for idef in self.index_definitions]
 
     def __str__(self):
         pass
@@ -156,15 +181,14 @@ class TableDefinition:
             cds.append(ColumnDefinition(d["column_name"], d["type"], d["is_nullable"]))
 
         # get index definitions
-        ## TODO
-        ids = []
         q = "select * from catalog_indices where table_name = %s"
         args = [table_name]
         res = run_q(cnx, q, args, True)
-        print(res)
-        ids = get_ids(res)
+        # print(res)
+        ids = get_ids(cnx, res, table_name)
 
-        # return cls()
+        return cls(t_name=table_name, csv_f=csv_f,
+                   column_definitions=cds, index_definitions=ids, cnx=cnx, load=True)
 
     def add_column_definition(self, c):
         """
@@ -172,24 +196,18 @@ class TableDefinition:
         :param c: New column. Cannot be duplicate or column not in the file.
         :return: None
         """
-        ## TODO test this
-        self.__add_column_definition(c)
-        self.column_definitions.append(c)
-
-    def __add_column_definition(self, c):
-        """
-        Private version of add_column_definition, which does not add c to self.column_definitions.
-        Used by constructor only.
-
-        :param c: New column. Cannot be duplicate or column not in the file.
-        :return: None
-        """
+        # check valid columns in csv
         if c.column_name not in self.valid_columns:
             raise de.DataTableException(code=-100, message="Column {} definition is invald".format(c.column_name))
+        # check duplicate columns in table
+        if c.column_name in self.columns:
+            raise de.DataTableException(
+                message="Duplicate column {} for table {}".format(c.column_name, self.table_name))
         q = "insert into catalog_columns values (%s, %s, %s, %s)"
         is_nullable = "yes" if c.not_null else "no" # convert python boolean to str for mysql
         args = [self.table_name, c.column_name, is_nullable, c.column_type]
         run_q(self.cnx, q, args, False)
+        self.column_definitions.append(c)
 
     def drop_column_definition(self, c):
         """
@@ -217,11 +235,8 @@ class TableDefinition:
         :param columns: List of column values in order.
         :return:
         """
-        table_columns = [cd.column_name for cd in self.column_definitions]
-        if not set(columns).issubset(set(table_columns)):
-            raise de.DataTableException(code=-1000, message="Primary key references an undefined column")
+        ## TODO Something specific for primary key here
         self.define_index("PRIMARY", columns, "PRIMARY")
-
 
     def define_index(self, index_name, columns, kind="INDEX"):
         """
@@ -231,7 +246,9 @@ class TableDefinition:
         :param kind: One of the valid index types.
         :return:
         """
-
+        table_columns = [cd.column_name for cd in self.column_definitions]
+        if not set(columns).issubset(set(table_columns)):
+            raise de.DataTableException(code=-1000, message="Key references an undefined column")
         i = 0
         for c_n in columns:
             q = "insert into catalog_indices values (%s, %s, %s, %s, %s)" # arg can be int
@@ -279,7 +296,7 @@ class CSVCatalog:
     def __str__(self):
         pass
 
-    def create_table(self, table_name, file_name, column_definitions=None, primary_key_columns=None):
+    def create_table(self, table_name, file_name, column_definitions=None, index_definitions=None):
         """
 
         :return: a TableDefinition object
@@ -287,7 +304,9 @@ class CSVCatalog:
         CSVCatalog.create_table creates the table by creating a TableDefinition, which in turn causes __init__ to occur.
         """
         return TableDefinition(t_name=table_name, csv_f=file_name,
-                               column_definitions=column_definitions, cnx=self.cnx)
+                               column_definitions=column_definitions,
+                               index_definitions=index_definitions,
+                               cnx=self.cnx)
 
 
     def drop_table(self, table_name):
@@ -335,16 +354,29 @@ def get_ids(cnx, res, table_name):
     :param res:
     :return:
     """
-    ids = []
-    indices = [d["index_name"] for d in res]
-    indices = list(set(indices))
-    i = 0
-    for d in res:
-        q = "select column_name from catalog_indices where table_name=%s and index_name=%s"
-        args = [table_name, indices[i]]
-        run_q(cnx, q, args, True)
-        i += 1
 
+
+
+    ids = []
+    index_names = [d["index_name"] for d in res]
+    index_names = list(set(index_names))
+    # TODO I am not sure when loading the IndexDefinitions, do we need to keep the ordinal positions
+    index_columns = {} # {index_name : columns} columns should be in the order of ordinal position
+    index_types = {}
+    index_orders = {}
+    for i in index_names:
+        index_columns[i] = []
+        index_types[i] = []
+        index_orders[i] = []
+    for d in res:
+        index_columns[d["index_name"]].append(d["column_name"])
+        index_types[d["index_name"]] = d["index_type"]
+        index_orders[d["index_name"]].append(d["ordinal_position"])
+    for index_name in index_names:
+        # order columns using ordinal position
+        columns = [x for _, x in sorted(zip(index_orders[index_name], index_columns[index_name]))]
+        ids.append(IndexDefinition(index_name, index_types[index_name], columns))
+    return ids
 
 
 
