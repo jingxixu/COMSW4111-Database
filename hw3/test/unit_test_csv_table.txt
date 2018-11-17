@@ -1,0 +1,129 @@
+*******************    Starting test_find_by_template    ********************
+
+
+People table metadata =
+ {
+  "definition": {
+    "name": "people",
+    "path": "/Users/donaldferguson/Dropbox/ColumbiaCourse/Courses/Fall2018/W4111-Projects/HW3_new/Data/core/People.csv"
+  },
+  "columns": [
+    {
+      "column_name": "birthCity",
+      "column_type": "text",
+      "not_null": false
+    },
+    {
+      "column_name": "birthCountry",
+      "column_type": "text",
+      "not_null": false
+    },
+    {
+      "column_name": "nameFirst",
+      "column_type": "text",
+      "not_null": false
+    },
+    {
+      "column_name": "nameLast",
+      "column_type": "text",
+      "not_null": true
+    },
+    {
+      "column_name": "playerID",
+      "column_type": "text",
+      "not_null": true
+    },
+    {
+      "column_name": "throws",
+      "column_type": "text",
+      "not_null": false
+    }
+  ],
+  "indexes": {
+    "id_idx": {
+      "index_name": "id_idx",
+      "columns": [
+        "nameLast"
+      ],
+      "kind": "INDEX"
+    }
+  }
+}
+Loaded people table =
+ Name: people File: /Users/donaldferguson/Dropbox/ColumbiaCourse/Courses/Fall2018/W4111-Projects/HW3_new/Data/core/People.csv
+Row count: 19370
+{
+  "definition": {
+    "name": "people",
+    "path": "/Users/donaldferguson/Dropbox/ColumbiaCourse/Courses/Fall2018/W4111-Projects/HW3_new/Data/core/People.csv"
+  },
+  "columns": [
+    {
+      "column_name": "birthCity",
+      "column_type": "text",
+      "not_null": false
+    },
+    {
+      "column_name": "birthCountry",
+      "column_type": "text",
+      "not_null": false
+    },
+    {
+      "column_name": "nameFirst",
+      "column_type": "text",
+      "not_null": false
+    },
+    {
+      "column_name": "nameLast",
+      "column_type": "text",
+      "not_null": true
+    },
+    {
+      "column_name": "playerID",
+      "column_type": "text",
+      "not_null": true
+    },
+    {
+      "column_name": "throws",
+      "column_type": "text",
+      "not_null": false
+    }
+  ],
+  "indexes": {
+    "id_idx": {
+      "index_name": "id_idx",
+      "columns": [
+        "nameLast"
+      ],
+      "kind": "INDEX"
+    }
+  }
+}
+ Index information:
+Name: id_idx, Columns: nameLast, No. of entries: 9939
+
+Sample rows:
+birthCity      birthCountry   nameFirst      nameLast       playerID       throws
+Denver         USA            David          Aardsma        aardsda01      R
+Mobile         USA            Hank           Aaron          aaronha01      R
+Mobile         USA            Tommie         Aaron          aaronto01      R
+Orange         USA            Don            Aase           aasedo01       R
+Palm Beach     USA            Andy           Abad           abadan01       L
+...            ...            ...            ...            ...            ...
+Monee          USA            Tony           Zych           zychto01       R
+St. Louis      USA            Dutch          Zwilling       zwilldu01      L
+Holland        USA            George         Zuverink       zuverge01      R
+San Mateo      USA            Paul           Zuvella        zuvelpa01      R
+San Francisco  USA            Frank          Zupo           zupofr01       R
+
+Starting test on find using indexed field, tmpl =  {"nameLast": "Williams"}
+Sample result =  [{"playerID": "williac01", "nameLast": "Williams", "nameFirst": "Ace"}, {"playerID": "willial02", "nameLast": "Williams", "nameFirst": "Al"}, {"playerID": "willial03", "nameLast": "Williams", "nameFirst": "Albert"}, {"playerID": "williar01", "nameLast": "Williams", "nameFirst": "Art"}, {"playerID": "willibe01", "nameLast": "Williams", "nameFirst": "Bernie"}, {"playerID": "willibe02", "nameLast": "Williams", "nameFirst": "Bernie"}, {"playerID": "willibi01", "nameLast": "Williams", "nameFirst": "Billy"}, {"playerID": "willibi02", "nameLast": "Williams", "nameFirst": "Billy"}, {"playerID": "willibo01", "nameLast": "Williams", "nameFirst": "Bob"}, {"playerID": "willibr01", "nameLast": "Williams", "nameFirst": "Brian"}, {"playerID": "willich01", "nameLast": "Williams", "nameFirst": "Charlie"}, {"playerID": "willicy01", "nameLast": "Williams", "nameFirst": "Cy"}, {"playerID": "willida01", "nameLast": "Williams", "nameFirst": "Dale"}, {"playerID": "willida02", "nameLast": "Williams", "nameFirst": "Dave"}, {"playerID": "willida03", "nameLast": "Williams", "nameFirst": "Davey"}, {"playerID": "willida05", "nameLast": "Williams", "nameFirst": "Dallas"}, {"playerID": "willida06", "nameLast": "Williams", "nameFirst": "Dana"}, {"playerID": "willida07", "nameLast": "Williams", "nameFirst": "David"}, {"playerID": "willide01", "nameLast": "Williams", "nameFirst": "Denny"}, {"playerID": "willide02", "nameLast": "Williams", "nameFirst": "Dewey"}, {"playerID": "willidi01", "nameLast": "Williams", "nameFirst": "Dib"}, {"playerID": "willidi02", "nameLast": "Williams", "nameFirst": "Dick"}, {"playerID": "willido01", "nameLast": "Williams", "nameFirst": "Don"}, {"playerID": "willido02", "nameLast": "Williams", "nameFirst": "Don"}, {"playerID": "williea01", "nameLast": "Williams", "nameFirst": "Earl"}, {"playerID": "williea02", "nameLast": "Williams", "nameFirst": "Earl"}, {"playerID": "willied01", "nameLast": "Williams", "nameFirst": "Eddie"}, {"playerID": "willifr01", "nameLast": "Williams", "nameFirst": "Frank"}, {"playerID": "willige01", "nameLast": "Williams", "nameFirst": "George"}, {"playerID": "willige02", "nameLast": "Williams", "nameFirst": "Gerald"}, {"playerID": "willige03", "nameLast": "Williams", "nameFirst": "George"}, {"playerID": "willigl01", "nameLast": "Williams", "nameFirst": "Glenn"}, {"playerID": "willigu01", "nameLast": "Williams", "nameFirst": "Gus"}, {"playerID": "willigu02", "nameLast": "Williams", "nameFirst": "Gus"}, {"playerID": "williha01", "nameLast": "Williams", "nameFirst": "Harry"}, {"playerID": "willija01", "nameLast": "Williams", "nameFirst": "Jackson"}, {"playerID": "willije01", "nameLast": "Williams", "nameFirst": "Jeff"}, {"playerID": "willije02", "nameLast": "Williams", "nameFirst": "Jerome"}, {"playerID": "williji01", "nameLast": "Williams", "nameFirst": "Jimmy"}, {"playerID": "williji03", "nameLast": "Williams", "nameFirst": "Jimy"}, {"playerID": "williji04", "nameLast": "Williams", "nameFirst": "Jim"}, {"playerID": "williji99", "nameLast": "Williams", "nameFirst": "Jimmy"}, {"playerID": "willijo02", "nameLast": "Williams", "nameFirst": "Johnnie"}, {"playerID": "willijo99", "nameLast": "Williams", "nameFirst": "Smokey Joe"}, {"playerID": "willike01", "nameLast": "Williams", "nameFirst": "Ken"}, {"playerID": "willike02", "nameLast": "Williams", "nameFirst": "Ken"}, {"playerID": "willike03", "nameLast": "Williams", "nameFirst": "Keith"}, {"playerID": "willile01", "nameLast": "Williams", "nameFirst": "Lefty"}, {"playerID": "willile03", "nameLast": "Williams", "nameFirst": "Leon"}, {"playerID": "willima01", "nameLast": "Williams", "nameFirst": "Marsh"}, {"playerID": "willima02", "nameLast": "Williams", "nameFirst": "Mark"}, {"playerID": "willima03", "nameLast": "Williams", "nameFirst": "Matt"}, {"playerID": "willima04", "nameLast": "Williams", "nameFirst": "Matt"}, {"playerID": "willima06", "nameLast": "Williams", "nameFirst": "Matt"}, {"playerID": "willima07", "nameLast": "Williams", "nameFirst": "Mason"}, {"playerID": "willimi02", "nameLast": "Williams", "nameFirst": "Mitch"}, {"playerID": "willimi03", "nameLast": "Williams", "nameFirst": "Mike"}, {"playerID": "willimu01", "nameLast": "Williams", "nameFirst": "Mutt"}, {"playerID": "willini01", "nameLast": "Williams", "nameFirst": "Nick"}, {"playerID": "williot01", "nameLast": "Williams", "nameFirst": "Otto"}, {"playerID": "willipa01", "nameLast": "Williams", "nameFirst": "Papa"}, {"playerID": "willipo01", "nameLast": "Williams", "nameFirst": "Pop"}, {"playerID": "willira01", "nameLast": "Williams", "nameFirst": "Randy"}, {"playerID": "willire01", "nameLast": "Williams", "nameFirst": "Reggie"}, {"playerID": "willire02", "nameLast": "Williams", "nameFirst": "Reggie"}, {"playerID": "williri01", "nameLast": "Williams", "nameFirst": "Rip"}, {"playerID": "williri02", "nameLast": "Williams", "nameFirst": "Rinaldo"}, {"playerID": "williri03", "nameLast": "Williams", "nameFirst": "Rick"}, {"playerID": "willish01", "nameLast": "Williams", "nameFirst": "Shad"}, {"playerID": "willist01", "nameLast": "Williams", "nameFirst": "Steamboat"}, {"playerID": "willist02", "nameLast": "Williams", "nameFirst": "Stan"}, {"playerID": "willita01", "nameLast": "Williams", "nameFirst": "Taylor"}, {"playerID": "willite01", "nameLast": "Williams", "nameFirst": "Ted"}, {"playerID": "willito01", "nameLast": "Williams", "nameFirst": "Tom"}, {"playerID": "willito02", "nameLast": "Williams", "nameFirst": "Todd"}, {"playerID": "willitr01", "nameLast": "Williams", "nameFirst": "Trevor"}, {"playerID": "williwa01", "nameLast": "Williams", "nameFirst": "Wash"}, {"playerID": "williwa02", "nameLast": "Williams", "nameFirst": "Walt"}, {"playerID": "williwo01", "nameLast": "Williams", "nameFirst": "Woody"}, {"playerID": "williwo02", "nameLast": "Williams", "nameFirst": "Woody"}]
+Elapsed time for  100 lookups =  0.01665210723876953
+
+
+Starting test on find using NON-indexed field, tmpl =  {"nameFirst": "Ted"}
+Sample result =  [{"playerID": "abernte01", "nameLast": "Abernathy", "nameFirst": "Ted"}, {"playerID": "abernte02", "nameLast": "Abernathy", "nameFirst": "Ted"}, {"playerID": "beardte01", "nameLast": "Beard", "nameFirst": "Ted"}, {"playerID": "blankte01", "nameLast": "Blankenship", "nameFirst": "Ted"}, {"playerID": "bowsfte01", "nameLast": "Bowsfield", "nameFirst": "Ted"}, {"playerID": "breitte01", "nameLast": "Breitenstein", "nameFirst": "Ted"}, {"playerID": "cathete01", "nameLast": "Cather", "nameFirst": "Ted"}, {"playerID": "cieslte01", "nameLast": "Cieslak", "nameFirst": "Ted"}, {"playerID": "coxte02", "nameLast": "Cox", "nameFirst": "Ted"}, {"playerID": "davidte01", "nameLast": "Davidson", "nameFirst": "Ted"}, {"playerID": "eastete01", "nameLast": "Easterly", "nameFirst": "Ted"}, {"playerID": "fordte01", "nameLast": "Ford", "nameFirst": "Ted"}, {"playerID": "goulate01", "nameLast": "Goulait", "nameFirst": "Ted"}, {"playerID": "grayte01", "nameLast": "Gray", "nameFirst": "Ted"}, {"playerID": "gullite01", "nameLast": "Gullic", "nameFirst": "Ted"}, {"playerID": "jourdte01", "nameLast": "Jourdan", "nameFirst": "Ted"}, {"playerID": "kazante01", "nameLast": "Kazanski", "nameFirst": "Ted"}, {"playerID": "kennete01", "nameLast": "Kennedy", "nameFirst": "Ted"}, {"playerID": "kleinte01", "nameLast": "Kleinhans", "nameFirst": "Ted"}, {"playerID": "kluszte01", "nameLast": "Kluszewski", "nameFirst": "Ted"}, {"playerID": "kubiate01", "nameLast": "Kubiak", "nameFirst": "Ted"}, {"playerID": "lepcite01", "nameLast": "Lepcio", "nameFirst": "Ted"}, {"playerID": "lewiste01", "nameLast": "Lewis", "nameFirst": "Ted"}, {"playerID": "lillyte01", "nameLast": "Lilly", "nameFirst": "Ted"}, {"playerID": "lyonste01", "nameLast": "Lyons", "nameFirst": "Ted"}, {"playerID": "martite01", "nameLast": "Martinez", "nameFirst": "Ted"}, {"playerID": "menzete01", "nameLast": "Menze", "nameFirst": "Ted"}, {"playerID": "odenwte01", "nameLast": "Odenwald", "nameFirst": "Ted"}, {"playerID": "olsonte01", "nameLast": "Olson", "nameFirst": "Ted"}, {"playerID": "pawelte01", "nameLast": "Pawelek", "nameFirst": "Ted"}, {"playerID": "petoste01", "nameLast": "Petoskey", "nameFirst": "Ted"}, {"playerID": "powerte01", "nameLast": "Power", "nameFirst": "Ted"}, {"playerID": "reedte01", "nameLast": "Reed", "nameFirst": "Ted"}, {"playerID": "sadowte01", "nameLast": "Sadowski", "nameFirst": "Ted"}, {"playerID": "savagte01", "nameLast": "Savage", "nameFirst": "Ted"}, {"playerID": "schefte01", "nameLast": "Scheffler", "nameFirst": "Ted"}, {"playerID": "schrete01", "nameLast": "Schreiber", "nameFirst": "Ted"}, {"playerID": "sepkote01", "nameLast": "Sepkowski", "nameFirst": "Ted"}, {"playerID": "simmote01", "nameLast": "Simmons", "nameFirst": "Ted"}, {"playerID": "sizemte01", "nameLast": "Sizemore", "nameFirst": "Ted"}, {"playerID": "sullite01", "nameLast": "Sullivan", "nameFirst": "Ted"}, {"playerID": "tappete01", "nameLast": "Tappe", "nameFirst": "Ted"}, {"playerID": "turnete02", "nameLast": "Turner", "nameFirst": "Ted"}, {"playerID": "turnete99", "nameLast": "Turner", "nameFirst": "Ted"}, {"playerID": "uhlaete01", "nameLast": "Uhlaender", "nameFirst": "Ted"}, {"playerID": "welchte01", "nameLast": "Welch", "nameFirst": "Ted"}, {"playerID": "wieante01", "nameLast": "Wieand", "nameFirst": "Ted"}, {"playerID": "wilbote01", "nameLast": "Wilborn", "nameFirst": "Ted"}, {"playerID": "wilkste01", "nameLast": "Wilks", "nameFirst": "Ted"}, {"playerID": "willite01", "nameLast": "Williams", "nameFirst": "Ted"}, {"playerID": "willste01", "nameLast": "Wills", "nameFirst": "Ted"}, {"playerID": "wingfte01", "nameLast": "Wingfield", "nameFirst": "Ted"}, {"playerID": "woodte01", "nameLast": "Wood", "nameFirst": "Ted"}]
+Elapsed time for  1000 lookups =  12.84610366821289
+
+
+********************    Complete test_finf_by_template    ********************
