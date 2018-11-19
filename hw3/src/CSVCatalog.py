@@ -281,11 +281,26 @@ class TableDefinition:
         """
         return self.to_json()
 
-
+    def get_indices(self):
+        """
+        Return a dictionary of indices {index_name: index_info}
+        """
+        if len(self.index_definitions) == 0:
+            return None
+        else:
+            result = dict()
+            for c in self.index_definitions:
+                sub_result = dict()
+                sub_result["index_name"] = c.index_name
+                sub_result["columns"] = c.columns
+                sub_result["index_type"] = c.index_type
+                result[c.index_name] = sub_result
+            return result
 
 class CSVCatalog:
-
+    ## TODO beter port
     def __init__(self, dbhost='localhost', dbname='CSVCatalog', dbuser='dbuser', dbpw='dbuser'):
+
         self.cnx = pymysql.connect(host=dbhost,
                               user=dbuser,
                               password=dbpw,
@@ -354,13 +369,9 @@ def get_ids(cnx, res, table_name):
     :param res:
     :return:
     """
-
-
-
     ids = []
     index_names = [d["index_name"] for d in res]
     index_names = list(set(index_names))
-    # TODO I am not sure when loading the IndexDefinitions, do we need to keep the ordinal positions
     index_columns = {} # {index_name : columns} columns should be in the order of ordinal position
     index_types = {}
     index_orders = {}

@@ -77,10 +77,10 @@ class CSVTable:
         return self.__description__.csv_f
 
     def __add_row__(self, projected_r):
+        ## modified
         if self.__rows__ is None:
-            self.__rows__ = [projected_r]
-        else:
-            self.__rows__.append(projected_r)
+            self.__rows__ = []
+        self.__rows__.append(projected_r)
 
     def __str__(self):
         """
@@ -88,10 +88,62 @@ class CSVTable:
         define on the class. So, I cannot provide a simple implementation.
         :return:
         """
-        return json.dumps(self.__rows__[:10], indent=2)
+        s = '\nTable overview (limit 6)\n'
+        s += json.dumps(self.__rows__[:10], indent=2)
+        s += '\nTable file path: {}\n'.format(self.__get_file_name__())
+        s += '\n Index information:\n'
+        for (name, entry) in self.__indexes__.items():
+            columns = self.__get_index_info__(name)["columns"]
+            s += 'Name: {}, Columns: {}, No. of entries: {}\n'.format(name, columns, len(entry))
+        return s
+
+    def __get_row_counts__(self):
+        ## New
+        if self.__rows__ is not None:
+            return len(self.__rows__)
+        else:
+            return 0
+
+    def __get_index_info__(self, index_name):
+        """
+        Get a dictionary of index info for 'index_name'
+        """
+        result = self.__description__.get_indices()
+        if result is not None:
+            result = result.get(index_name, None)
+        return result
+
+    def __get_index_value__(self, row, index_name):
+        idx_elements = []
+        idx_info = self.__get_index_info__(index_name)
+        columns = idx_info["columns"]
+
+        for c in columns:
+            idx_elements.append(row[c])
+
+        result = "_".join(idx_elements)
+
+        return result
+
+    def __build_index__(self, index_name, index_columns):
+        new_index = {}
+        for r in self.__rows__:
+            idx_value = self.__get_index_value__(r, index_name)
+            idx_entry = new_index.get(idx_value, [])
+            idx_entry.append(r)
+            new_index[idx_value] = idx_entry
+
+        return new_index
 
     def __build_indexes__(self):
-        pass
+        self.__indexes__ = {}
+        # defined_indexes = self.__description__["indexes"]
+        # for (k, v) in defined_indexes.items():
+        #     new_idx = self.__build_index__(v["index_name"], v["columns"])
+        #     self.__indexes__[v["index_name"]] = new_idx
+        for c in self.__description__.index_definitions:
+            new_idx = self.__build_index__(c.index_name, c.columns)
+            self.__indexes__[c.index_name] = new_idx
 
     def __get_access_path__(self, tmp):
         """
@@ -105,7 +157,30 @@ class CSVTable:
         :param tmp: Query template.
         :return: Index or None
         """
-        pass
+        if self.__indexes__ is None:
+            return None, None
+        else:
+            result = None
+            count = None
+
+        if tmp is None:
+            return None
+
+        tmp_set = set(tmp)
+
+        idx_dict = self.__description__.get_indices()
+
+        for (k, the_idx) in idx_dict.items():
+            columns = set(the_idx["columns"])
+            if columns.issubset(tmp_set):
+                if result is None:
+                    result = the_idx["index_name"]
+                    count = len(self.__indexes__[result])
+                else:
+                    if count < len(self.__indexes__["index_name"]):
+                        result = the_idx["index_name"]
+                        count = len(self.__indexes__[result])
+        return result, count
 
     def matches_template(self, row, t):
         """
@@ -194,7 +269,42 @@ class CSVTable:
         :param offset: Not implemented. Ignore
         :return: Matching tuples.
         """
-        pass
+        idx_name = idx
+        idx_info = self.__get_index_info__(idx_name)
+        idx_columns = idx_info["columns"]
+        key_values = self.__get_index_value__(t, idx_name)
+        the_index = self.__indexes__[idx_name]
+        tmp_result = the_index.get(key_values, None)
+
+        if tmp_result:
+            result = []
+            for r in tmp_result:
+                if self.matches_template(r, t):
+                    result.append(r)
+            result = self.project(result, fields)
+        else:
+            result = None
+
+        return result
+        # if limit is not None or offset is not None:
+        #     raise DataTableExceptions.DataTableException(-101, "Limit/offset not supported for CSVTable")
+        #
+        # # If there are rows and the template is not None
+        # if self.__rows__ is not None:
+        #     index_value = self.__get_index_value__(t, idx)
+        #
+        #     result = []
+        #
+        #     # Add the rows that match the template to the newly created table.
+        #     for r in self.__indexes__[idx][index_value]:
+        #         if self.matches_template(r, t):
+        #             result.append(r)
+        #
+        #     result = self.project(result, fields)
+        # else:
+        #     result = None
+        #
+        # return result
 
     def find_by_template(self, t, fields=None, limit=None, offset=None):
         """
@@ -203,10 +313,17 @@ class CSVTable:
         # 1. Validate the template values relative to the defined columns.
         # 2. Determine if there is an applicable index, and call __find_by_template_index__ if one exists.
         # 3. Call __find_by_template_scan__ if not applicable index.
-        ## TODO start from here
-        ## TODO __find_by_template_scan__ is already available
-        ## How could find by template faster if using an index field
-        return self.__find_by_template_scan__(t, fields, limit, offset)
+
+        if t is not None:
+            access_index, count = self.__get_access_path__(list(t.keys()))
+        else:
+            access_index = None
+
+        if access_index is None:
+            return self.__find_by_template_scan__(t, fields=fields, limit=None, offset=None)
+        else:
+            result = self.__find_by_template_index__(t, access_index, fields, limit, offset)
+            return result
 
     def insert(self, r):
         raise DataTableExceptions.DataTableException(

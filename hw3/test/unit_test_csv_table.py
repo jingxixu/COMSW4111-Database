@@ -47,7 +47,7 @@ def test_find_by_template():
 
 
     people_tbl = CSVTable.CSVTable("people")
-    print("Loaded people table (limit 6) = \n", people_tbl)
+    print("Loaded people table = \n", people_tbl)
 
     tries = 100
     start_time = time.time()
@@ -71,7 +71,7 @@ def test_find_by_template():
     end_time = time.time()
     print("Elapsed time for ", tries, "lookups = ", end_time - start_time)
 
-    print_test_separator("Complete test_finf_by_template")
+    print_test_separator("Complete test_find_by_template")
 
 
 if __name__ == "__main__":
