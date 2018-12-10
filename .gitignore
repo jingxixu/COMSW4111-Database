@@ -108,4 +108,4 @@ venv.bak/
 
 # project specific
 neo4j*
-redis*
+redis-5.0.2/
